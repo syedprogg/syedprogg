@@ -77,15 +77,26 @@ check("no inline style attributes (GitHub's sanitiser strips them)", () => {
   );
 });
 
-check("side-by-side pairs fit one row (sum of widths <= 100%)", () => {
+// Measured in Chrome against GitHub's own rendering: in a 343 px phone column
+// a card at width="48%" lands at ~165 px, a 0.41 scale that drops the card's
+// ~14 px text to about 6 px. github-readme-stats clamps `card_width`
+// server-side, so no narrower source exists to swap in via <picture>, and
+// GitHub strips <style>, so there are no breakpoints to work with. One card
+// per row at 100% is therefore the only legible mobile layout.
+check("cards sit one per row at full width, so phone text stays legible", () => {
   for (const [, block] of body.matchAll(/<p align="center">([\s\S]*?)<\/p>/gi)) {
-    const widths = [...block.matchAll(/<img\b[^>]*>/gi)]
-      .map((m) => widthOf(m[0]))
-      .filter(Boolean)
-      .map((w) => parseFloat(w));
-    if (widths.length < 2) continue;
-    const total = widths.reduce((a, b) => a + b, 0);
-    assert(total <= 100, `a centred row totals ${total}% and will wrap or overflow`);
+    const sized = [...block.matchAll(/<img\b[^>]*>/gi)]
+      .map((m) => [srcOf(m[0]), widthOf(m[0])])
+      .filter(([, w]) => w !== undefined);
+    if (sized.length === 0) continue;
+    assert(
+      sized.length === 1,
+      `${sized.length} sized images share one row; each would render at ~1/${sized.length} scale on a phone`,
+    );
+    assert(
+      parseFloat(sized[0][1]) === 100,
+      `${sized[0][0]} is ${sized[0][1]} wide; a lone card should fill the column at 100%`,
+    );
   }
 });
 

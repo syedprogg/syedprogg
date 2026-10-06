@@ -2,11 +2,13 @@
   Profile README for github.com/syedprogg
   Layout contract (enforced by tests/readme.e2e.mjs):
     - every stat / card image uses a PERCENTAGE width, never a pixel width,
-      so GitHub's README column can shrink to phone width without
-      horizontal scrolling.
-    - no fixed-width <table>/<td> wrappers around images (the previous
-      layout used width="50%" <td> cells holding px-sized cards, which
-      forced a ~900 px minimum width on mobile).
+      so the image scales with GitHub's README column instead of fixing it.
+    - cards sit ONE PER ROW at width="100%". Measured on a 343 px phone
+      column, the old two-per-row layout rendered each card at ~165 px, a
+      0.41 scale factor that shrinks the card's ~14 px text to about 6 px.
+      The cards are SVG, so a full-width row scales cleanly both ways:
+      ~0.86 on a phone (legible) and ~2.4 on a desktop (crisp).
+    - no <table>/<td> wrappers around images.
 -->
 
 <h1 align="center">Hey there 👋, I'm Syed Asad Abbas</h1>
@@ -36,15 +38,18 @@
 ## Projects
 
 <p align="center">
-  <a href="https://github.com/syedprogg/Portfolio"><img width="48%" src="https://github-readme-stats.vercel.app/api/pin/?username=syedprogg&repo=Portfolio&hide_border=true&theme=synthwave" alt="Portfolio repository card" /></a>
-  <a href="https://github.com/syedprogg/testing-only"><img width="48%" src="https://github-readme-stats.vercel.app/api/pin/?username=syedprogg&repo=testing-only&hide_border=true&theme=synthwave" alt="testing-only repository card" /></a>
+  <a href="https://github.com/syedprogg/Portfolio"><img width="100%" src="https://github-readme-stats.vercel.app/api/pin/?username=syedprogg&repo=Portfolio&hide_border=true&theme=synthwave" alt="Portfolio repository card" /></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/syedprogg/testing-only"><img width="100%" src="https://github-readme-stats.vercel.app/api/pin/?username=syedprogg&repo=testing-only&hide_border=true&theme=synthwave" alt="testing-only repository card" /></a>
 </p>
 
 <!-- TODO(syedprogg): markov-crypto, lms and Marketing-Workflow are PRIVATE, so
      github-readme-stats cannot render cards for them without a self-hosted
-     instance holding a PAT. Make a repo public and add a card here, keeping the
-     width="48%" pattern:
-     <a href="https://github.com/syedprogg/NAME"><img width="48%" src="https://github-readme-stats.vercel.app/api/pin/?username=syedprogg&repo=NAME&hide_border=true&theme=synthwave" alt="NAME repository card" /></a>
+     instance holding a PAT. Make a repo public and add a card here, in its own
+     centred <p> at width="100%", like the two above:
+     <a href="https://github.com/syedprogg/NAME"><img width="100%" src="https://github-readme-stats.vercel.app/api/pin/?username=syedprogg&repo=NAME&hide_border=true&theme=synthwave" alt="NAME repository card" /></a>
 -->
 
 <br/>
@@ -94,8 +99,11 @@
 </p>
 
 <p align="center">
-  <img width="49%" src="https://github-readme-stats.vercel.app/api?username=syedprogg&include_orgs=true&show_icons=true&count_private=true&hide_border=true&theme=synthwave" alt="GitHub stats for syedprogg" />
-  <img width="49%" src="https://github-readme-stats.vercel.app/api/top-langs/?username=syedprogg&hide_border=true&include_all_commits=true&hide=html&layout=compact&theme=synthwave" alt="Most used languages by syedprogg" />
+  <img width="100%" src="https://github-readme-stats.vercel.app/api?username=syedprogg&include_orgs=true&show_icons=true&count_private=true&hide_border=true&theme=synthwave" alt="GitHub stats for syedprogg" />
+</p>
+
+<p align="center">
+  <img width="100%" src="https://github-readme-stats.vercel.app/api/top-langs/?username=syedprogg&hide_border=true&include_all_commits=true&hide=html&layout=compact&theme=synthwave" alt="Most used languages by syedprogg" />
 </p>
 
 <br/>

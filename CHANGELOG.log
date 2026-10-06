@@ -13,15 +13,31 @@ Author: Syed Asad Abbas (syedasad@betterdevices.io), with Claude Opus 5
     file was dead weight — nothing on the profile page displayed it.
 
 [2] Replaced the <table>/<td width="50%"> card layout with centred <p>
-    blocks holding <img width="48%"> / <img width="49%">
-    Why: this is the actual responsiveness defect. The cards are raster/SVG
-    images served at a fixed intrinsic size (~400 px each), and the nested
-    tables pinned two of them side by side inside 50 % cells. The table's
-    minimum content width was therefore ~900 px, so on a 375 px phone the
-    README overflowed horizontally. A percentage width on the <img> scales
-    with the container instead of fixing it, so the row narrows with the
-    viewport and never overflows. Percentage widths on <img> survive
-    GitHub's HTML sanitiser; CSS in a style= attribute does not (see [3]).
+    blocks holding a single <img width="100%"> each — one card per row.
+    Why: this is the actual responsiveness defect, though not in the way it
+    first appears. GitHub's own CSS already prevents page-level horizontal
+    scroll (.markdown-body img { max-width: 100% }), so the old layout did
+    not overflow — it did something subtler and worse. The cards are SVGs
+    with a ~400 px intrinsic width, and the table pinned two of them into
+    50 % cells. Measured in Chrome against GitHub's rendering with the
+    README column forced to 343 px (iPhone 14 content width), each card
+    rendered at 162-168 px: a scale factor of 0.36-0.41, which shrinks the
+    card's ~14 px label text to roughly 5-6 px. The cards "fit" but cannot
+    be read.
+    A percentage width on the <img> is necessary but not sufficient: an
+    <img width="48%"> reproduces exactly the same 165 px, 0.41-scale result
+    (verified before this entry was corrected). The fix is one card per row
+    at width="100%", measured at 0.86 scale on a 343 px column and crisp at
+    any size because the cards are vector.
+    Alternatives ruled out, both tested rather than assumed:
+      - serving a narrower card to small screens via <picture media=...>:
+        github-readme-stats clamps the card_width parameter server-side
+        (requests for 160/200/250/300 all return a 400 px pin card and a 437 px
+        stats card), so no narrow source exists to swap in.
+      - CSS breakpoints: GitHub strips <style> and style= from README HTML
+        (see [3]), so there is no mechanism for a width breakpoint at all.
+    Percentage widths on <img> do survive the sanitiser, which is why the
+    layout is expressed that way.
 
 [3] Dropped all style="margin: 10px" / style="max-width: 100%" attributes
     Why: GitHub strips style= from README HTML, so every layout rule written
@@ -87,6 +103,19 @@ Author: Syed Asad Abbas (syedasad@betterdevices.io), with Claude Opus 5
     github-readme-stats "error card" responses that return HTTP 200.
     Run with: node tests/readme.e2e.mjs   (add --offline to skip the network
     layers).
+
+[10] Verified in a real browser, not only in the test suite
+    Why: a passing source-contract test does not prove legibility. Chrome
+    was pointed at GitHub's rendering of this branch
+    (github.com/syedprogg/syedprogg/blob/feat/responsive-readme/README.md)
+    and the README column was forced to 343 px, 375 px and 768 px.
+    Results: zero overflowing elements and scrollWidth == clientWidth at
+    every width, for both the old file and the new one. That measurement
+    is what disproved the original "~900 px minimum width" reasoning in
+    [2] and surfaced the real defect (0.41-scale, ~6 px card text), which
+    the one-card-per-row layout then fixed. The e2e suite gained a test
+    ("cards sit one per row at full width") that locks the rule in, so a
+    future edit back to two-up fails CI rather than silently regressing.
 
 TEST RESULT 2026-10-06: 12/12 passed.
   2 WARNINGS, both expected and both tracked:
