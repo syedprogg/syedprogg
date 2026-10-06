@@ -1,0 +1,108 @@
+CHANGELOG.log — syedprogg/syedprogg
+Append-only record of every change, with the justification for it.
+Newest entry first. Dates are ISO-8601 (UTC). Measurements are metric.
+
+================================================================================
+2026-10-06 — branch feat/responsive-readme
+Author: Syed Asad Abbas (syedasad@betterdevices.io), with Claude Opus 5
+================================================================================
+
+[1] Renamed "README (1).md" -> "README.md"
+    Why: GitHub only renders a profile README when the file in the
+    owner-named repo is called exactly README.md. With the "(1)" suffix the
+    file was dead weight — nothing on the profile page displayed it.
+
+[2] Replaced the <table>/<td width="50%"> card layout with centred <p>
+    blocks holding <img width="48%"> / <img width="49%">
+    Why: this is the actual responsiveness defect. The cards are raster/SVG
+    images served at a fixed intrinsic size (~400 px each), and the nested
+    tables pinned two of them side by side inside 50 % cells. The table's
+    minimum content width was therefore ~900 px, so on a 375 px phone the
+    README overflowed horizontally. A percentage width on the <img> scales
+    with the container instead of fixing it, so the row narrows with the
+    viewport and never overflows. Percentage widths on <img> survive
+    GitHub's HTML sanitiser; CSS in a style= attribute does not (see [3]).
+
+[3] Dropped all style="margin: 10px" / style="max-width: 100%" attributes
+    Why: GitHub strips style= from README HTML, so every layout rule written
+    there was already a no-op. Keeping them implied a responsiveness that
+    was not in effect.
+
+[4] Fixed unbalanced markup
+    Why: the original file contained stray </td><td valign="top"
+    width="50%"> fragments outside any <table> (around the "Private
+    Projects" and "Others" sections). The sanitiser discarded them, which
+    silently broke the intended two-column grouping.
+
+[5] Repointed every stats / card / counter URL from ElNiak to syedprogg
+    Why: user instruction — the README must show this account's repo and
+    contribution data. Changed:
+      - github-readme-stats  api?username=         -> syedprogg
+      - github-readme-stats  api/top-langs/        -> syedprogg
+      - komarev ghpvc profile-views counter        -> syedprogg
+      - contribution snake SVG                     -> syedprogg (see [7])
+    Also switched the stats host from the self-hosted fork
+    github-readme-stats-five-gilt-39.vercel.app (a third party's instance,
+    could disappear at any time) to the official
+    github-readme-stats.vercel.app.
+
+[6] Replaced the pinned repo cards
+    Why: the previous cards pinned ElNiak/csvl repositories (PFV,
+    Protocols-Ivy, SEMA-ToolChain, BountyDork, cupp-rs, RustyNetCracker,
+    SmartHumanTracker, GitBooster, PySSH3, DSLCanvas, Dorking-PenTesting,
+    awesome-*), none of which exist under syedprogg. They now point at this
+    account's public repos: Portfolio and testing-only.
+    Known limitation: markov-crypto, lms and Marketing-Workflow are private.
+    github-readme-stats returns an error card for private repos unless it
+    runs on a self-hosted instance holding a PAT, so they are intentionally
+    absent. A TODO in README.md records how to add them once public.
+
+[7] Added .github/workflows/snake.yml; removed the committers.top badge
+    Why: the contribution snake SVG was hot-linked from ElNiak's repo. That
+    image is produced by a GitHub Action, so pointing the URL at syedprogg
+    is not enough — the action has to exist here to generate it. The
+    workflow publishes snake.svg and snake-dark.svg to the `output` branch
+    (not main, to keep regenerated binaries out of history) every 6 hours.
+    The committers.top badge was ElNiak-specific (Belgium leaderboard) and
+    had no syedprogg equivalent, so it was dropped rather than repointed.
+
+[8] Removed the research biography, publication list and BibTeX blocks
+    Why: that content described Christophe Crochet (ElNiak), a researcher at
+    UCLouvain, and listed papers authored by named third parties. Leaving it
+    under this account would misattribute other people's work. It was
+    removed, not rewritten — the original file is preserved in git history
+    at commit 098fe96. README.md carries a TODO where the intro belongs.
+    The social badges (LinkedIn / Buy Me a Coffee / Medium) still resolve to
+    those third-party accounts and are marked TODO; they were left in place
+    rather than guessed at.
+
+[9] Added tests/readme.e2e.mjs (Node 24, no dependencies)
+    Why: org policy requires end-to-end tests. The suite runs three layers:
+    the source layout contract (percentage widths, no tables, no style=,
+    row widths <= 100 %, balanced tags, correct username, alt text present,
+    light/dark <picture> wired to the workflow's real output branch); a
+    render through GitHub's own /markdown API, asserting no image is lost to
+    the sanitiser and the percentage widths survive; and a live fetch of all
+    31 image URLs, failing on 404s, non-image content types, and on
+    github-readme-stats "error card" responses that return HTTP 200.
+    Run with: node tests/readme.e2e.mjs   (add --offline to skip the network
+    layers).
+
+TEST RESULT 2026-10-06: 12/12 passed.
+  2 WARNINGS, both expected and both tracked:
+    raw.githubusercontent.com/syedprogg/syedprogg/output/snake.svg      404
+    raw.githubusercontent.com/syedprogg/syedprogg/output/snake-dark.svg 404
+  These 404 until .github/workflows/snake.yml runs for the first time, which
+  cannot happen until this branch is merged to main. The suite classifies
+  them as pending rather than failing, and README.md carries a comment with
+  the manual trigger path (Actions > "Generate contribution snake" > Run
+  workflow). Re-run the suite after that first run; both must turn green.
+
+NOT CHANGED (untracked files found in the working tree, left alone):
+  hugo.toml, snake.yml (repo root), static.yml — these arrived during the
+  session and also originate from ElNiak's setup (hugo.toml still carries
+  baseURL https://elniak.github.io and the title "Christophe Crochet
+  [ElNiak]"). The root-level snake.yml is inert: GitHub only runs workflows
+  from .github/workflows/, and it targets the `master` branch which does not
+  exist here. They are outside the scope of this change and were not
+  committed.
