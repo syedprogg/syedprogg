@@ -127,11 +127,28 @@ TEST RESULT 2026-10-06: 12/12 passed.
   the manual trigger path (Actions > "Generate contribution snake" > Run
   workflow). Re-run the suite after that first run; both must turn green.
 
-NOT CHANGED (untracked files found in the working tree, left alone):
-  hugo.toml, snake.yml (repo root), static.yml — these arrived during the
-  session and also originate from ElNiak's setup (hugo.toml still carries
-  baseURL https://elniak.github.io and the title "Christophe Crochet
-  [ElNiak]"). The root-level snake.yml is inert: GitHub only runs workflows
-  from .github/workflows/, and it targets the `master` branch which does not
-  exist here. They are outside the scope of this change and were not
-  committed.
+[11] Deleted the three untracked files added mid-session: snake.yml and
+    static.yml (both at the repo root) and hugo.toml. User decision, after
+    the following was established:
+      - Neither snake.yml nor static.yml ever ran. GitHub only executes
+        workflows found under .github/workflows/; both sat in the repo
+        root. snake.yml additionally triggered on `master`, a branch that
+        does not exist here (this repo uses main), and would have pushed
+        the generated SVG into that branch's root. It is superseded by
+        .github/workflows/snake.yml (see [7]), which is in the right path,
+        triggers on main, emits light and dark variants, and publishes to a
+        dedicated `output` branch.
+      - static.yml deploys the entire repo to GitHub Pages with path: '.'.
+        Pages is not enabled on this repo (GET /repos/syedprogg/syedprogg/
+        pages returns 404), the repo contains no index.html, and the result
+        would publish at syedprogg.github.io/syedprogg/ — a user site
+        requires a repo named syedprogg.github.io.
+      - hugo.toml is ElNiak's academic-CV config verbatim: baseURL
+        https://elniak.github.io, title "Christophe Crochet [ElNiak]",
+        theme theme-academic-cv. That theme is not vendored and there is no
+        .gitmodules; no content/, layouts/, themes/, archetypes/, static/ or
+        docs/ directory exists, so Hugo could not build anything. Its
+        `paginate` key was also deprecated in Hugo 0.128 in favour of
+        pagination.pagerSize.
+    A personal site remains possible later; it belongs in its own repo
+    (named syedprogg.github.io for a user site), not in the profile repo.
